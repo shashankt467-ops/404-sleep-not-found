@@ -3,7 +3,7 @@ from typing import List
 import os
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "HC-04 Emergency Information Interoperability"
+    PROJECT_NAME: str = "HEALIX Emergency Information Interoperability"
     API_V1_STR: str = "/api"
     
     # Secret keys for JWT
@@ -14,7 +14,11 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # Database URL - defaults to SQLite for zero-dependency local testing, easily overridden by PostgreSQL
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./hc04.db")
+    # On Vercel serverless environments, default to /tmp/hc04.db because the root filesystem is read-only.
+    DATABASE_URL: str = os.getenv(
+        "DATABASE_URL",
+        "sqlite:////tmp/hc04.db" if os.getenv("VERCEL") else "sqlite:///./hc04.db"
+    )
     
     # CORS Origins
     CORS_ORIGINS: List[str] = [
@@ -28,7 +32,10 @@ class Settings(BaseSettings):
     ]
     
     # Upload directory
-    UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "./uploads")
+    UPLOAD_DIR: str = os.getenv(
+        "UPLOAD_DIR",
+        "/tmp/uploads" if os.getenv("VERCEL") else "./uploads"
+    )
     
     # External EHR connector configurations (per requirement #52)
     FHIR_BASE_URL: str = os.getenv("FHIR_BASE_URL", "https://mock-hospital-fhir.hc04.internal/r4")
