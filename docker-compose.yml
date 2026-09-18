@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: hc04_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hc04_admin
+      POSTGRES_PASSWORD: EmergencySecurePass2026
+      POSTGRES_DB: hc04_interop
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hc04_admin -d hc04_interop"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hc04_gateway
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://hc04_admin:EmergencySecurePass2026@db:5432/hc04_interop
+      - JWT_SECRET=hc04-production-super-secret-jwt-signing-key-2026-interop
+      - JWT_REFRESH_SECRET=hc04-production-refresh-token-signing-key-2026-interop
+      - CORS_ORIGINS=["*"]
+      - AUTO_SEED=true
+    volumes:
+      - ./frontend:/app/frontend
+
+volumes:
+  postgres_data:
