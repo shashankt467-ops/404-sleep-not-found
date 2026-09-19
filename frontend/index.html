@@ -756,6 +756,7 @@ async function submitLogin() {
       state.selectedPatientId = cleanId;
       state.patientOtpSent = true;
       state.tempDevOtp = otpData.dev_otp;
+      state.patientDeliveredTo = otpData.delivered_to || 'registered email';
       render();
       return;
     } catch (e) {
@@ -1223,9 +1224,12 @@ function viewLogin() {
         <input value="${state.selectedPatientId}" disabled>
       </div>
       <div class="field">
-        <label>Enter 6-Digit OTP Sent to Registered Contact</label>
+        <label>Enter 6-Digit OTP</label>
+        <p class="small" style="margin-bottom:8px;color:var(--text-muted);">
+          A verification code has been dispatched to your pre-registered hospital contact: <strong style="color:var(--teal)">${state.patientDeliveredTo || 'registered email'}</strong>
+        </p>
         <input id="patient-otp-input" onkeydown="if(event.key==='Enter') verifyPatientOtp()" placeholder="e.g. 123456" value="${state.tempDevOtp || ''}">
-        <p class="small" style="margin-top:6px;color:var(--teal)">Verification OTP: <strong>${state.tempDevOtp || 'Check SMS'}</strong></p>
+        <p class="small" style="margin-top:6px;color:var(--teal)">Quick Dev Code: <strong>${state.tempDevOtp || 'Check Email'}</strong></p>
       </div>
       <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;" onclick="verifyPatientOtp()">Verify OTP &amp; Open Portal</button>
       <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:6px;" onclick="state.patientOtpSent=false;render();">Back</button>
