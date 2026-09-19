@@ -51,6 +51,14 @@ class Settings(BaseSettings):
     # Development Seed flag
     AUTO_SEED: bool = True
 
+    # SMTP Email Configuration (Gmail OTP Delivery)
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_USER: str = os.getenv("SMTP_USER", "shashankt467@gmail.com")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "slskgqadrrskikzp")
+    SMTP_FROM_NAME: str = os.getenv("SMTP_FROM_NAME", "HEALIX Emergency Healthcare")
+    DEFAULT_PATIENT_EMAIL: str = os.getenv("DEFAULT_PATIENT_EMAIL", "shashankt467@gmail.com")
+
     class Config:
         env_file = ".env"
         extra = "allow"

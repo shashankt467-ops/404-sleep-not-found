@@ -15,6 +15,8 @@ from app.models.medical_record import MedicalRecord
 from app.models.audit import AuditLog
 from app.services.patient_id_gen import generate_patient_id, generate_qr_token
 from app.schemas.patient import PatientCreateRequest, PatientResponse, PatientSearchQuery
+from app.core.config import settings
+from app.services.email_service import send_otp_email_async
 
 router = APIRouter(prefix="/patients", tags=["Patients"])
 
@@ -230,21 +232,30 @@ def request_patient_access_otp(id: str, db: Session = Depends(get_db)):
     db.commit()
 
     # Mask contact for privacy
-    contact_display = patient.phone or patient.email or "registered emergency contact"
-    if patient.phone and len(patient.phone) >= 7:
-        masked = patient.phone[:3] + "•••" + patient.phone[-3:]
-    elif patient.email:
-        parts = patient.email.split("@")
+    target_email = patient.email or settings.DEFAULT_PATIENT_EMAIL
+    if target_email and "@" in target_email:
+        parts = target_email.split("@")
         masked = parts[0][:2] + "•••@" + parts[1]
+    elif patient.phone and len(patient.phone) >= 7:
+        masked = patient.phone[:3] + "•••" + patient.phone[-3:]
     else:
-        masked = "registered contact"
+        masked = "registered email"
+
+    # Dispatch actual email via Gmail SMTP
+    send_otp_email_async(
+        recipient_email=target_email,
+        patient_name=patient.full_name,
+        patient_id=patient.id,
+        otp_code=otp_code
+    )
 
     # In development/evaluation mode, return OTP code in response for testing convenience
     return {
-        "message": f"Verification OTP sent to {masked}.",
+        "message": f"Verification OTP sent to {masked} (check your Gmail inbox).",
         "patient_id": patient.id,
         "expires_in_minutes": 10,
-        "dev_otp": otp_code # Clearly marked for testing when SMS gateway isn't connected
+        "delivered_to": masked,
+        "dev_otp": otp_code # Marked for convenience alongside live email delivery
     }
 
 @router.post("/{id}/verify-otp")

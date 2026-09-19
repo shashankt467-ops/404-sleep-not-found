@@ -110,6 +110,7 @@ def seed_database(db: Session):
     pat1 = Patient(
         id="HC04-PAT-1024", full_name="Arjun Kumar", dob="14/02/2004", sex="Male",
         phone="+91 98765 11024", emergency_contact="Kavita Kumar (+91 98765 11025)",
+        email="shashankt467@gmail.com",
         blood_group="O+", allergies=json.dumps(["Penicillin"]),
         existing_conditions=json.dumps(["Diabetes"]),
         priority="HIGH PRIORITY", status="Active",
