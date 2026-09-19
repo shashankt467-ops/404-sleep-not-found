@@ -16,10 +16,11 @@ RUN pip install --no-cache-dir -r /app/backend/requirements.txt
 # Copy application source code
 COPY backend /app/backend
 COPY frontend /app/frontend
+COPY run_server.py /app/run_server.py
 
 ENV PYTHONPATH=/app/backend
-ENV DATABASE_URL=postgresql://hc04_admin:EmergencySecurePass2026@db:5432/hc04_interop
+ENV PORT=8000
 
 EXPOSE 8000
 
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
